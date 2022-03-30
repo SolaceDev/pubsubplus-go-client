@@ -4,13 +4,10 @@ properties([
 currentBuild.rawBuild.getParent().setQuietPeriod(0)
 
 
-library 'jenkins-pipeline-library@SOL-63732/tags_versioned'
+library 'jenkins-pipeline-library@main'
 
 node('linux_docker') {
   notify(slackChannel: '#re-build') {
-    stage ('Checkout') {
-      checkout scm
-    }
     stage('Build') {
       builder.goapi()
     }
