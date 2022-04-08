@@ -17,4 +17,6 @@
 //go:build dummy
 // +build dummy
 
+// Package solclient is provided as a workaround for go vendoring and contains no go code.
+// See internal/ccsmp/dummy.go for more information.
 package solclient
