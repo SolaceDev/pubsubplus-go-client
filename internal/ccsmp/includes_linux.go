@@ -18,8 +18,8 @@ package ccsmp
 
 /*
 // specific flags for linux static builds in C
-#cgo CFLAGS: -I${SRCDIR}/../../lib/linux/include
-#cgo LDFLAGS: ${SRCDIR}/../../lib/linux/lib/libsolclient.a -lm -ldl -lpthread -lrt
+#cgo CFLAGS: -I${SRCDIR}/lib/include
+#cgo LDFLAGS: ${SRCDIR}/lib/linux/libsolclient.a -lm -ldl -lpthread -lrt
 
 #include <dlfcn.h>
 */
