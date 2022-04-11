@@ -18,7 +18,7 @@ package ccsmp
 
 /*
 // specific flags for alpine static builds in C
-#cgo CFLAGS: -I${SRCDIR}/../../lib/alpine/include
-#cgo LDFLAGS: -L/usr/local/opt/openssl@1.1/lib ${SRCDIR}/../../lib/alpine/lib/libsolclient.a -lm -ldl -lpthread -lrt
+#cgo CFLAGS: -I${SRCDIR}/lib/include
+#cgo LDFLAGS: ${SRCDIR}/lib/alpine/libsolclient.a -lm -ldl -lpthread -lrt
 */
 import "C"
