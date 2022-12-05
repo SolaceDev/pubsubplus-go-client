@@ -139,6 +139,8 @@ type MessagingService interface {
         // - solace/errors.*InvalidDataTypeError: If the specified
         //     value is not an acceptable type for the specified property.
         // - solace/errors.*IllegalArgumentError: If the specified property cannot
+        // -   be modified.
+        // - solace/errors.*IllegalStateError: If the specified property cannot
         //     be modified in the current service state.
         // - solace/errors.*PubSubPlusClientError: If other transport or communication related errors occur.
         UpdateProperty(property config.ServiceProperty, value interface{}) error
