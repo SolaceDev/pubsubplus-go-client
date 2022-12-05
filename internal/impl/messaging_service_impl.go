@@ -33,6 +33,7 @@ import (
 	"solace.dev/go/messaging/internal/impl/publisher"
 	"solace.dev/go/messaging/pkg/solace"
 	"solace.dev/go/messaging/pkg/solace/metrics"
+        "solace.dev/go/messaging/pkg/solace/config"
 )
 
 // the main service lifecycle state
@@ -155,6 +156,10 @@ func (service *messagingServiceImpl) Connect() (ret error) {
 	atomic.StoreInt32(&service.state, messagingServiceStateConnected)
 	service.connectFuture.Complete(nil)
 	return nil
+}
+
+func (service *messagingServiceImpl) UpdateProperty(property config.ServiceProperty) (ret error) {
+    return nil
 }
 
 func (service *messagingServiceImpl) downEventHandler(sessionEventInfo core.SessionEventInfo) {

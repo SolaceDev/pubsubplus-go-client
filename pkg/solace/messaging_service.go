@@ -121,6 +121,27 @@ type MessagingService interface {
 
 	// Info returns the API Info for this MessagingService instance.
 	Info() metrics.APIInfo
+
+        // Updates the value of a modifiable service property once the service has been created.
+        // Modifiable service properties include:
+        //     * SCHEME_OAUTH2_ACCESS_TOKEN,
+        //       whose update will be applied during the next reconnection attempt.
+        //     * SCHEME_OAUTH2_OIDC_ID_TOKEN,
+        //       whose update will be applied during the next reconnection attempt.
+        //
+        // Modification of a service property may occur instantly, or may occur during the next
+        // service reconnection.
+        // Modification of a service property during an ongoing service reconnection may apply
+        // to the next reconnection attempt.
+        // property (ServiceProperty): The name of the property to modify.
+        // value (string): The new value of the property.
+        //
+        // - solace/errors.*InvalidDataTypeError: If the specified property is None, or if the specified
+        //     value is not an acceptable value for the specified property.
+        // - solace/errors.*IllegalArgumentError: If the specified property cannot
+        //     be modified in the current service state.
+        // - solace/errors.*PubSubPlusClientError: If other transport or communication related errors occur.
+        UpdateProperty(property config.ServiceProperty) error
 }
 
 // MessagingServiceBuilder is used to configure and build MessagingService instances.
