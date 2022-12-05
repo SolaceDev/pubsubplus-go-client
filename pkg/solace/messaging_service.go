@@ -134,14 +134,14 @@ type MessagingService interface {
         // Modification of a service property during an ongoing service reconnection may apply
         // to the next reconnection attempt.
         // property (ServiceProperty): The name of the property to modify.
-        // value (string): The new value of the property.
+        // value (interface{}): The new value of the property.
         //
-        // - solace/errors.*InvalidDataTypeError: If the specified property is None, or if the specified
-        //     value is not an acceptable value for the specified property.
+        // - solace/errors.*InvalidDataTypeError: If the specified
+        //     value is not an acceptable type for the specified property.
         // - solace/errors.*IllegalArgumentError: If the specified property cannot
         //     be modified in the current service state.
         // - solace/errors.*PubSubPlusClientError: If other transport or communication related errors occur.
-        UpdateProperty(property config.ServiceProperty) error
+        UpdateProperty(property config.ServiceProperty, value interface{}) error
 }
 
 // MessagingServiceBuilder is used to configure and build MessagingService instances.

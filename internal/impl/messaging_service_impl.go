@@ -158,7 +158,7 @@ func (service *messagingServiceImpl) Connect() (ret error) {
 	return nil
 }
 
-func (service *messagingServiceImpl) UpdateProperty(property config.ServiceProperty) (ret error) {
+func (service *messagingServiceImpl) UpdateProperty(property config.ServiceProperty, value interface{}) (ret error) {
     return nil
 }
 
