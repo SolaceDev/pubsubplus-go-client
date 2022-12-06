@@ -88,6 +88,12 @@ type IllegalArgumentError struct {
 	solaceError
 }
 
+// InvalidDataTypeError indicates an argument with an invalid data type was passed to a function.
+// The pointer type *InvalidDataTypeError is returned.
+type InvalidDataTypeError struct {
+        solaceError
+}
+
 // InvalidConfigurationError indicates that a specified configuration is invalid.
 // These errors are returned by the Build functions of a builder.
 // The pointer type *InvalidConfigurationError is returned.
