@@ -233,6 +233,32 @@ var _ = Describe("OAuth Strategy", func() {
 			Entry("When given access token d, no id token and an issuer identifier", tokenD, "", issuerIdentifier),
 		)
 
+                Describe("When the messaging service tries to connect after multiple token updates", func() {
+                        Context("When the multiple updates were applied before the first connection with valid tokens", func() {
+                                It("should not fail when trying to connect the messaging service", func() {
+                                        var err error
+                                        // We first set the tokens and issuer identifier to empty strings to prove that the update
+                                        // later on actually worked. If the update doesn't work, the connection attempt will fail
+                                        // because the original tokens were invalid. If the connection attempt succeeds, it is only
+                                        // because the service token properties were successfully updated.
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                "invalid access token",
+                                                "invalid id token",
+                                                "",
+                                        )).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
+                                        Expect(err).ToNot(HaveOccurred())
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenC)
+                                        Expect(err).ToNot(HaveOccurred())
+                                        helpers.ConnectMessagingService(messagingService)
+                                        // Validation of connection state occurs within the ConnectMessagingService
+                                        // and DisconnectMessagingService methods
+                                        helpers.DisconnectMessagingService(messagingService)
+                                })
+                        })
+                })
+
 		DescribeTable("Messaging Service fails to connect",
 			func(access, id, issuer string) {
 				var err error

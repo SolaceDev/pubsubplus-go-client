@@ -168,7 +168,7 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
         }
 
         var state = service.getState()
-	if !(state == messagingServiceStateConnected || state == messagingServiceStateConnecting) {
+	if !(state == messagingServiceStateConnected || state == messagingServiceStateNotConnected || state == messagingServiceStateConnecting) {
                 // If the service is not connected or connecting, then the service is not in a valid state for
                 // updating service properties, so we return an error.
                 return solace.NewError(&solace.IllegalArgumentError{}, fmt.Sprintf(constants.UnableToModifyPropertyOfUnstartedOrDisconnectedService), nil)
