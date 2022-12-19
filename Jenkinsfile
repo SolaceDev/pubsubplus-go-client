@@ -4,7 +4,7 @@ properties([
 ])
 currentBuild.rawBuild.getParent().setQuietPeriod(0)
 
-library 'jenkins-pipeline-library@SOL-67871'
+library 'jenkins-pipeline-library@main'
 
 stage('Build') {
   builder.goapi()
