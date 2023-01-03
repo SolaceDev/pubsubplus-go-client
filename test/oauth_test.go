@@ -247,13 +247,64 @@ var _ = Describe("OAuth Strategy", func() {
                                                 "",
                                         )).Build()
                                         Expect(err).ToNot(HaveOccurred())
+
+                                        // First round of updates
                                         err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
                                         Expect(err).ToNot(HaveOccurred())
                                         err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenC)
                                         Expect(err).ToNot(HaveOccurred())
+
+                                        // Second round of updates
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
+                                        Expect(err).ToNot(HaveOccurred())
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenC)
+                                        Expect(err).ToNot(HaveOccurred())
+
                                         helpers.ConnectMessagingService(messagingService)
                                         // Validation of connection state occurs within the ConnectMessagingService
                                         // and DisconnectMessagingService methods
+                                        helpers.DisconnectMessagingService(messagingService)
+                                })
+                        })
+
+                        Context("When the multiple updates were applied after the first connection with valid tokens", func() {
+                                It("should not fail when trying to reconnect the messaging service", func() {
+                                        var err error
+
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                tokenC,
+                                                tokenB,
+                                                "",
+                                        )).WithReconnectionRetryStrategy(config.RetryStrategyForeverRetry()).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        helpers.ConnectMessagingService(messagingService)
+
+                                        // First round of updates
+                                        // Updating the ID token to the same value is not redundant because we are verifying that the update
+                                        // of that property can occur at all, regardless of the value being different.
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
+                                        Expect(err).ToNot(HaveOccurred())
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenD)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        // Second round of updates
+                                        // Updating the ID token to the same value is not redundant because we are verifying that the update
+                                        // of that property can occur at all, regardless of the value being different.
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
+                                        Expect(err).ToNot(HaveOccurred())
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenD)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        reconnectChan := make(chan struct{})
+                                        messagingService.AddReconnectionListener(func(event solace.ServiceEvent) {
+                                                close(reconnectChan)
+                                        })
+
+                                        helpers.ForceDisconnectViaSEMPv2(messagingService)
+                                        Eventually(reconnectChan).Should(BeClosed())
+
+                                        // Clean up messaging service
                                         helpers.DisconnectMessagingService(messagingService)
                                 })
                         })
