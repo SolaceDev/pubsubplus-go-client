@@ -355,6 +355,34 @@ var _ = Describe("OAuth Strategy", func() {
                                 })
                         })
 
+                        Context("When the token is updated on a disconnected service", func() {
+                                It("should return an IllegalStateError", func() {
+                                        var err error
+
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                tokenC,
+                                                tokenB,
+                                                "",
+                                        )).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        // We need to connect and then disconnect the service to get the service into
+                                        // the `disconnected` state since it is valid for the application to update the
+                                        // tokens on a service that has not yet been connected, but not on one that is
+                                        // already disconnected.
+                                        helpers.ConnectMessagingService(messagingService)
+                                        helpers.DisconnectMessagingService(messagingService)
+                                        Expect(messagingService.IsConnected()).To(BeFalse())
+
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, tokenB)
+                                        Expect(err).To(HaveOccurred())
+                                        helpers.ValidateError(err, &solace.IllegalStateError{})
+
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, tokenC)
+                                        Expect(err).To(HaveOccurred())
+                                        helpers.ValidateError(err, &solace.IllegalStateError{})
+                                })
+                        })
                 })
 
 		DescribeTable("Messaging Service fails to connect",
