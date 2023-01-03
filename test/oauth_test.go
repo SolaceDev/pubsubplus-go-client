@@ -383,6 +383,23 @@ var _ = Describe("OAuth Strategy", func() {
                                         helpers.ValidateError(err, &solace.IllegalStateError{})
                                 })
                         })
+
+                        Context("When an invalid property is used to update the token", func() {
+                                It("should return an IllegalArgumentError", func() {
+                                        var err error
+
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                tokenC,
+                                                tokenB,
+                                                "",
+                                        )).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeBasicPassword, "arbitrary string")
+                                        Expect(err).To(HaveOccurred())
+                                        helpers.ValidateError(err, &solace.IllegalArgumentError{})
+                                })
+                        })
                 })
 
 		DescribeTable("Messaging Service fails to connect",
