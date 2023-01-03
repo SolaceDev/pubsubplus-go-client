@@ -171,7 +171,7 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
         if !(state == messagingServiceStateConnected || state == messagingServiceStateNotConnected || state == messagingServiceStateConnecting) {
                 // If the service is not connected or connecting, then the service is not in a valid state for
                 // updating service properties, so we return an error.
-                return solace.NewError(&solace.IllegalArgumentError{}, fmt.Sprintf(constants.UnableToModifyPropertyOfDisconnectedService), nil)
+                return solace.NewError(&solace.IllegalStateError{}, fmt.Sprintf(constants.UnableToModifyPropertyOfDisconnectedService), nil)
         }
 
         // FFC: Currently the following array is only needed within this method, and this method is not on the data path,
