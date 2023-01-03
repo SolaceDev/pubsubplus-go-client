@@ -309,7 +309,9 @@ var _ = Describe("OAuth Strategy", func() {
                                         helpers.DisconnectMessagingService(messagingService)
                                 })
                         })
+                })
 
+                Describe("When the service tries to update the token in an invalid way", func() {
                         Context("When the token is updated with an invalid token value after successfully connecting", func() {
                                 It("should fail to reconnect", func() {
                                         var err error
