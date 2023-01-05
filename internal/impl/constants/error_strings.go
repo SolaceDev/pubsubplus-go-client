@@ -25,9 +25,6 @@ const UnableToModifyPropertyOfDisconnectedService = "unable to modify a property
 // UnableToModifyNonModifiableGivenServiceProperty error string
 const UnableToModifyNonModifiableGivenServiceProperty = "unable to modify the non-modifiable given service property: %s"
 
-// UnableToModifyServicePropertyWithInvalidValue error string
-const UnableToModifyServicePropertyWithInvalidValue = "unable to modify the given service property: %s, with value %s"
-
 // UnableToConnectAlreadyDisconnectedService error string
 const UnableToConnectAlreadyDisconnectedService = "unable to connect messaging service in state %s"
 

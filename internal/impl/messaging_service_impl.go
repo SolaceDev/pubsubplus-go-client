@@ -21,7 +21,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-        "reflect"
 
 	"solace.dev/go/messaging/internal/impl/executor"
 	"solace.dev/go/messaging/internal/impl/future"
@@ -66,10 +65,10 @@ const (
 	messagingServiceSubStateDown         messagingServiceSubState = iota
 )
 
-// This map contains the list of modifiable properties and the acceptable value type for that property
-var modifiableProperties = map[config.ServiceProperty]reflect.Type{
-        config.AuthenticationPropertySchemeOAuth2AccessToken: reflect.TypeOf(""),
-        config.AuthenticationPropertySchemeOAuth2OIDCIDToken: reflect.TypeOf(""),
+// This map contains the list of modifiable service properties
+var modifiableProperties = [...]config.ServiceProperty{
+        config.AuthenticationPropertySchemeOAuth2AccessToken,
+        config.AuthenticationPropertySchemeOAuth2OIDCIDToken,
 }
 
 type messagingServiceImpl struct {
@@ -171,7 +170,7 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
 
         // Verify that the passed property is a valid property
         var propertyIsModifiable = false
-        for modifiableProperty := range modifiableProperties {
+        for _, modifiableProperty := range modifiableProperties {
                 if property == modifiableProperty {
                         propertyIsModifiable = true
                         break
@@ -179,12 +178,6 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
         }
         if !propertyIsModifiable {
                 return solace.NewError(&solace.IllegalArgumentError{}, fmt.Sprintf(constants.UnableToModifyNonModifiableGivenServiceProperty, property), nil)
-        }
-
-
-        // Verify that the passed value is of the appropriate type for the passed property
-        if !(reflect.TypeOf(value) == modifiableProperties[property]) {
-                return solace.NewError(&solace.InvalidDataTypeError{}, fmt.Sprintf(constants.UnableToModifyServicePropertyWithInvalidValue, property, value), nil)
         }
 
 

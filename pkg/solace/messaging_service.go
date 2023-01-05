@@ -136,8 +136,6 @@ type MessagingService interface {
         // property (ServiceProperty): The name of the property to modify.
         // value (interface{}): The new value of the property.
         //
-        // - solace/errors.*InvalidDataTypeError: If the specified
-        //     value is not an acceptable type for the specified property.
         // - solace/errors.*IllegalArgumentError: If the specified property cannot
         // -   be modified.
         // - solace/errors.*IllegalStateError: If the specified property cannot

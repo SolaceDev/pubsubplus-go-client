@@ -401,24 +401,6 @@ var _ = Describe("OAuth Strategy", func() {
                                         helpers.ValidateError(err, &solace.IllegalArgumentError{})
                                 })
                         })
-
-                        Context("When a non-string value is used to update the token value", func() {
-                                It("should return an InvalidDataTypeError", func() {
-                                        var err error
-
-                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
-                                                tokenC,
-                                                tokenB,
-                                                "",
-                                        )).Build()
-                                        Expect(err).ToNot(HaveOccurred())
-
-                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, 75)
-                                        Expect(err).To(HaveOccurred())
-                                        helpers.ValidateError(err, &solace.InvalidDataTypeError{})
-
-                                })
-                        })
                 })
 
 		DescribeTable("Messaging Service fails to connect",
