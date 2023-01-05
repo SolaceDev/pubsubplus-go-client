@@ -124,9 +124,9 @@ type MessagingService interface {
 
         // Updates the value of a modifiable service property once the service has been created.
         // Modifiable service properties include:
-        //     - solace/config.*AuthenticationPropertySchemeOAuth2AccessToken,
+        //     - solace/config.AuthenticationPropertySchemeOAuth2AccessToken,
         //       whose update will be applied during the next reconnection attempt.
-        //     - solace/config.*AuthenticationPropertySchemeOAuth2OIDCIDToken,
+        //     - solace/config.AuthenticationPropertySchemeOAuth2OIDCIDToken,
         //       whose update will be applied during the next reconnection attempt.
         //
         // Modification of a service property may occur instantly, or may occur during the next

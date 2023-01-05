@@ -336,7 +336,6 @@ var _ = Describe("OAuth Strategy", func() {
 
                                         reconnectChan := make(chan struct{})
                                         messagingService.AddReconnectionListener(func(event solace.ServiceEvent) {
-                                                fmt.Println("Service reconnect found")
                                                 close(reconnectChan)
                                         })
 
@@ -347,9 +346,11 @@ var _ = Describe("OAuth Strategy", func() {
                                         // The service should fail to reconnect above, so if the service is connected at this point,
                                         // then there was an error that was not detected, so we will fail the test here, after
                                         // cleaning up the service.
-                                        if messagingService.IsConnected() {
-                                                helpers.DisconnectMessagingService(messagingService)
-                                                close(reconnectChan)
+                                        var messagingServiceIsConnected = messagingService.IsConnected()
+                                        helpers.DisconnectMessagingService(messagingService)
+                                        close(reconnectChan)
+
+                                        if messagingServiceIsConnected {
                                                 Fail("Service was expected to be disconnected, but instead was connected.")
                                         }
                                 })

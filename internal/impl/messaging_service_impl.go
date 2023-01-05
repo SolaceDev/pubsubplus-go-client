@@ -21,6 +21,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+        "reflect"
 
 	"solace.dev/go/messaging/internal/impl/executor"
 	"solace.dev/go/messaging/internal/impl/future"
@@ -65,11 +66,11 @@ const (
 	messagingServiceSubStateDown         messagingServiceSubState = iota
 )
 
-// var mmessagingServiceSubStateNames = map[messagingServiceSubState]string{
-// 	messagingServiceSubStateUp:           "Up",
-// 	messagingServiceSubStateReconnecting: "Reconnecting",
-// 	messagingServiceSubStateDown:         "Down",
-// }
+// This map contains the list of modifiable properties and the acceptable value type for that property
+var modifiableProperties = map[config.ServiceProperty]reflect.Type{
+        config.AuthenticationPropertySchemeOAuth2AccessToken: reflect.TypeOf(""),
+        config.AuthenticationPropertySchemeOAuth2OIDCIDToken: reflect.TypeOf(""),
+}
 
 type messagingServiceImpl struct {
 	transport        core.Transport
@@ -159,14 +160,7 @@ func (service *messagingServiceImpl) Connect() (ret error) {
 }
 
 func (service *messagingServiceImpl) UpdateProperty(property config.ServiceProperty, value interface{}) (ret error) {
-        // Verify that the value is of type string. This is necessary since the only values that are acceptable for the
-        // properties that are currently supported for modification are strings. We take an interface type as the parameter
-        // for the sake of forwards compatibility.
-        _, valueIsString := value.(string)
-        if !valueIsString {
-                return solace.NewError(&solace.InvalidDataTypeError{}, fmt.Sprintf(constants.UnableToModifyServicePropertyWithInvalidValue, property, value), nil)
-        }
-
+        // Verify the service is in the correct state for this operation
         var state = service.getState()
         if !(state == messagingServiceStateConnected || state == messagingServiceStateNotConnected || state == messagingServiceStateConnecting) {
                 // If the service is not connected or connecting, then the service is not in a valid state for
@@ -174,12 +168,10 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
                 return solace.NewError(&solace.IllegalStateError{}, fmt.Sprintf(constants.UnableToModifyPropertyOfDisconnectedService), nil)
         }
 
-        // FFC: Currently the following array is only needed within this method, and this method is not on the data path,
-        // so we can tolerate allocating the array each time this method is called. This array could be moved elsewhere,
-        // but that would likely require the use of a global variable.
-        var modifiableProperties = [...]config.ServiceProperty {config.AuthenticationPropertySchemeOAuth2AccessToken, config.AuthenticationPropertySchemeOAuth2OIDCIDToken}
+
+        // Verify that the passed property is a valid property
         var propertyIsModifiable = false
-        for _, modifiableProperty := range modifiableProperties {
+        for modifiableProperty := range modifiableProperties {
                 if property == modifiableProperty {
                         propertyIsModifiable = true
                         break
@@ -188,6 +180,13 @@ func (service *messagingServiceImpl) UpdateProperty(property config.ServicePrope
         if !propertyIsModifiable {
                 return solace.NewError(&solace.IllegalArgumentError{}, fmt.Sprintf(constants.UnableToModifyNonModifiableGivenServiceProperty, property), nil)
         }
+
+
+        // Verify that the passed value is of the appropriate type for the passed property
+        if !(reflect.TypeOf(value) == modifiableProperties[property]) {
+                return solace.NewError(&solace.InvalidDataTypeError{}, fmt.Sprintf(constants.UnableToModifyServicePropertyWithInvalidValue, property, value), nil)
+        }
+
 
         // All checks passed, proceed with property update
         ccsmpProperty := servicePropertyToCCSMPMap[property]
