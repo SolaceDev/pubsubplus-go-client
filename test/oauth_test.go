@@ -348,7 +348,6 @@ var _ = Describe("OAuth Strategy", func() {
                                         // cleaning up the service.
                                         var messagingServiceIsConnected = messagingService.IsConnected()
                                         helpers.DisconnectMessagingService(messagingService)
-                                        close(reconnectChan)
 
                                         if messagingServiceIsConnected {
                                                 Fail("Service was expected to be disconnected, but instead was connected.")
@@ -392,7 +391,6 @@ var _ = Describe("OAuth Strategy", func() {
                                         // cleaning up the service.
                                         var messagingServiceIsConnected = messagingService.IsConnected()
                                         helpers.DisconnectMessagingService(messagingService)
-                                        close(reconnectChan)
 
                                         if messagingServiceIsConnected {
                                                 Fail("Service was expected to be disconnected, but instead was connected.")
@@ -436,7 +434,6 @@ var _ = Describe("OAuth Strategy", func() {
                                         // cleaning up the service.
                                         var messagingServiceIsConnected = messagingService.IsConnected()
                                         helpers.DisconnectMessagingService(messagingService)
-                                        close(reconnectChan)
 
                                         if messagingServiceIsConnected {
                                                 Fail("Service was expected to be disconnected, but instead was connected.")
