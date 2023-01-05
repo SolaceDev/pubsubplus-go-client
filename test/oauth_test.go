@@ -356,6 +356,94 @@ var _ = Describe("OAuth Strategy", func() {
                                 })
                         })
 
+                        Context("When the token is updated with an invalid token type after successfully connecting", func() {
+                                It("should fail to reconnect", func() {
+                                        var err error
+
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                tokenC,
+                                                tokenB,
+                                                "",
+                                        )).WithReconnectionRetryStrategy(config.RetryStrategyParameterizedRetry(1, 200*time.Millisecond)).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        helpers.ConnectMessagingService(messagingService)
+
+                                        // We are passing a non-empty string as the value for a valid token property, so we expect the update
+                                        // to not return any errors. Instead the error is expected to be returned later when we try to
+                                        // reconnect using the invalid token.
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, 75)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, 75)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        reconnectChan := make(chan struct{})
+                                        messagingService.AddReconnectionListener(func(event solace.ServiceEvent) {
+                                                close(reconnectChan)
+                                        })
+
+                                        helpers.ForceDisconnectViaSEMPv2(messagingService)
+                                        Consistently(reconnectChan).ShouldNot(Receive())
+                                        Eventually(messagingService.IsConnected()).Should(BeFalse())
+
+                                        // The service should fail to reconnect above, so if the service is connected at this point,
+                                        // then there was an error that was not detected, so we will fail the test here, after
+                                        // cleaning up the service.
+                                        var messagingServiceIsConnected = messagingService.IsConnected()
+                                        helpers.DisconnectMessagingService(messagingService)
+                                        close(reconnectChan)
+
+                                        if messagingServiceIsConnected {
+                                                Fail("Service was expected to be disconnected, but instead was connected.")
+                                        }
+                                })
+                        })
+
+                        Context("When the token is updated with a nil token value after successfully connecting", func() {
+                                It("should fail to reconnect", func() {
+                                        var err error
+
+                                        messagingService, err = builder.WithAuthenticationStrategy(config.OAuth2Authentication(
+                                                tokenC,
+                                                tokenB,
+                                                "",
+                                        )).WithReconnectionRetryStrategy(config.RetryStrategyParameterizedRetry(1, 200*time.Millisecond)).Build()
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        helpers.ConnectMessagingService(messagingService)
+
+                                        // We are passing a non-empty string as the value for a valid token property, so we expect the update
+                                        // to not return any errors. Instead the error is expected to be returned later when we try to
+                                        // reconnect using the invalid token.
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2OIDCIDToken, nil)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        err = messagingService.UpdateProperty(config.AuthenticationPropertySchemeOAuth2AccessToken, nil)
+                                        Expect(err).ToNot(HaveOccurred())
+
+                                        reconnectChan := make(chan struct{})
+                                        messagingService.AddReconnectionListener(func(event solace.ServiceEvent) {
+                                                close(reconnectChan)
+                                        })
+
+                                        helpers.ForceDisconnectViaSEMPv2(messagingService)
+                                        Consistently(reconnectChan).ShouldNot(Receive())
+                                        Eventually(messagingService.IsConnected()).Should(BeFalse())
+
+                                        // The service should fail to reconnect above, so if the service is connected at this point,
+                                        // then there was an error that was not detected, so we will fail the test here, after
+                                        // cleaning up the service.
+                                        var messagingServiceIsConnected = messagingService.IsConnected()
+                                        helpers.DisconnectMessagingService(messagingService)
+                                        close(reconnectChan)
+
+                                        if messagingServiceIsConnected {
+                                                Fail("Service was expected to be disconnected, but instead was connected.")
+                                        }
+                                })
+                        })
+
                         Context("When the token is updated on a disconnected service", func() {
                                 It("should return an IllegalStateError", func() {
                                         var err error
