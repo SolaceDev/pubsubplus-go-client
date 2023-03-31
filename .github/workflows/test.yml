@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir reports
           go install github.com/onsi/ginkgo/v2/ginkgo@v2.1.3
-          ginkgo --focus="MessagingService Lifecycle" --junit-report=./reports/report.xml -coverprofile ./reports/coverage.out -coverpkg solace.dev/go/messaging/internal/...,solace.dev/go/messaging/pkg/... -tags enable_debug_logging
+          ginkgo --junit-report=./reports/report.xml -coverprofile ./reports/coverage.out -coverpkg solace.dev/go/messaging/internal/...,solace.dev/go/messaging/pkg/... -tags enable_debug_logging
         working-directory: ./test
 
       - name: Uploads artifacts
