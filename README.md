@@ -3,7 +3,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/solace.dev/go/messaging.svg)](https://pkg.go.dev/solace.dev/go/messaging)
 [![Go Report Card](https://goreportcard.com/badge/solace.dev/go/messaging)](https://goreportcard.com/report/solace.dev/go/messaging)
 
-The Solace PubSub+ API for Go is used to access the services of a Solace PubSub+ Event Broker. //trigger pipeline
+The Solace PubSub+ API for Go is used to access the services of a Solace PubSub+ Event Broker.
 
 ## Getting Started
 
