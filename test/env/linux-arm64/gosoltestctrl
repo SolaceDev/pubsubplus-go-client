@@ -1,0 +1,66 @@
+#!/bin/bash
+source $WORKSPACE/re-plumbing/tools/pubsubplus-go-client/linux-arm64-env/solacego_test_control.sh
+source $WORKSPACE/re-plumbing/tools/pubsubplus-go-client/linux-arm64-env/solace-go-env.sh
+
+function usage(){
+    echo "${BASH_SOURCE[0]} <cmd> [args]"
+    echo "  executes gosolace control commands"
+    echo "<cmd>:"
+    echo "    broker <subcmd>:  commands for controlling gosolace test broker services"
+    echo "                      use '${BASH_SOURCE[0]} broker help' for details"
+    echo "    proxy <subcmd>:   commands for controlling gosolace test proxy service"
+    echo "                      use '${BASH_SOURCE[0]} proxy help' for details"
+    echo "    kdc <subcmd>:     commands for controlling gosolace test kerberos kdc service"
+    echo "                      use '${BASH_SOURCE[0]} kdc help' for details"
+    echo "    kcmd <krbcmds...> executes kerberos command in python test krb evnvironment"
+    echo "                      Example krb cammands are kinit, klist, etc"
+    echo "    run <options>:    commands for executing gosolace tests"
+    echo "                      use '${BASH_SOURCE[0]} run help' for details"
+    echo "    help, -h:         displays this text"
+}
+
+ARGS=$@
+CMD=$1
+shift
+SUB_CMD_ARGS=""
+while [ "$1" ]; do
+    SUB_CMD_ARG="$1"
+    if [[ "$SUB_CMD_ARG" == "-t" ]]; then
+        #echo "FOUND>>>>>>>>>>>>>>>>>"
+        #SUB_CMD_ARGS="$SUB_CMD_ARGS $SUB_CMD_ARG"
+        shift
+        TEST_FILTER=$1
+    else
+        SUB_CMD_ARGS="$SUB_CMD_ARGS $SUB_CMD_ARG"
+    fi
+    shift
+done
+
+function runCmd() {
+    local CMD=$1
+    shift
+    local SUB_CMD=$CMD
+    if [ "$CMD" == "broker" ]; then
+        test_broker $@
+    elif [ "$CMD" == "proxy" ]; then
+        test_proxy $@
+    elif [ "$CMD" == "kdc" ]; then
+        test_kdc $@
+    elif [ "$CMD" == "kcmd" ]; then
+        krb_command $@
+    elif [ "$CMD" == "run" ]; then
+       #local SUB_CMD_ARGS=""
+        #while [ "$1" ]; do
+        #    local SUB_CMD_ARG="$1"
+        #    local SUB_CMD_ARGS="$SUB_CMD_ARGS \"$SUB_CMD_ARG\""
+        #    shift
+        #done
+        #echo "Passing sub args $SUB_CMD_ARGS"
+        runtests $SUB_CMD_ARGS
+    elif [[ "$CMD" == "help" || "$CMD" == "-h" ]]; then
+        usage
+    else
+        printErr "Unrecognized command '$CMD' for gosoltestctrl"
+    fi
+}
+runCmd $ARGS
