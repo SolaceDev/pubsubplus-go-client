@@ -1,6 +1,6 @@
 #!/bin/bash
-source $WORKSPACE/re-plumbing/tools/pubsubplus-go-client/linux-arm64-env/solacego_test_control.sh
-source $WORKSPACE/re-plumbing/tools/pubsubplus-go-client/linux-arm64-env/solace-go-env.sh
+source $WORKSPACE/test/env/linux-arm64/solacego_test_control.sh
+source $WORKSPACE/test/env/linux-arm64/solace-go-env.sh
 
 function usage(){
     echo "${BASH_SOURCE[0]} <cmd> [args]"
