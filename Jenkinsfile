@@ -34,17 +34,5 @@ library 'jenkins-pipeline-library@CRE-705'
   Adoption of new versions into these may be delayed.
 */
 
-builder.goapi([
-  "buildCheckGoVer": 'auto-v1.17.x',
-  "validationGoVer": 'auto-v1.17.x',
-  "getTestPermutations": {
-    List<List<String>> permutations = []
-    for (platform in [builder.LINUX_MUSL]) {
-      for (gover in ['auto-latest', 'auto-previous']) {
-        permutations << [platform, gover]
-      }
-    }
-    return permutations
-  }
-])  
+builder.goapi()  
 
