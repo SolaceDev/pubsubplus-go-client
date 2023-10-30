@@ -54,7 +54,7 @@ Any new features added to the API must have corresponding tests added ot the [in
 
 #### Github Actions
 
-The integration tests are run on every new commit via Github Actions. These tests are run on the latest Go version on Linux.
+The integration tests are run on every new commit via Github Actions. These tests are run on the latest Go version on Linux. A compile check is run against go v1.17 to ensure no new language features are in use.
 
 ### Generated Code
 Certain sections of code in this project are generated from the C API's header files. For example, given the solClient.h file,
