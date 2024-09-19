@@ -782,10 +782,9 @@ var _ = Describe("PersistentReceiver", func() {
 			})
 
 			const numQueuedMessages = 10000
-			Context(fmt.Sprintf("with %d queued messages", numQueuedMessages), Label("flaky-tests"), func() {
+			// Todo (EBP-46): currently investigating why these tests fail
+			Context(fmt.Sprintf("with %d queued messages", numQueuedMessages), func() {
 				BeforeEach(func() {
-					Skip("Currently failing in Jenkins pipeline on Linux Musl nodes - SOL-124616")
-
 					helpers.PublishNPersistentMessages(messagingService, topicString, numQueuedMessages)
 					Eventually(func() int {
 						resp, _, err := testcontext.SEMP().Monitor().QueueApi.GetMsgVpnQueueMsgs(testcontext.SEMP().MonitorCtx(),
