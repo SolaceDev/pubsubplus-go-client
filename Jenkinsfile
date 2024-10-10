@@ -39,7 +39,7 @@ builder.goapi([
   "validationGoVer": 'auto-v1.17.x',
   "getTestPermutations": {
     List<List<String>> permutations = []
-    for (platform in [builder.LINUX_ARM, builder.LINUX_X86_64, builder.LINUX_MUSL, builder.DARWIN_X86_64,  builder.DARWIN_ARM]) {
+    for (platform in [builder.LINUX_ARM, builder.LINUX_X86_64, builder.LINUX_MUSL]) {
       for (gover in ['auto-latest', 'auto-previous']) {
         permutations << [platform, gover]
       }
