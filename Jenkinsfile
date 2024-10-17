@@ -40,7 +40,7 @@ builder.goapi([
   "getTestPermutations": {
     List<List<String>> permutations = []
     for (platform in [builder.LINUX_MUSL]) {
-      for (gover in ['auto-v1.22.4', 'auto-v1.21.11']) {
+      for (gover in ['auto-v1.22.4', 'auto-v1.22.3']) {
         permutations << [platform, gover]
       }
     }
