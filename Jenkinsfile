@@ -20,7 +20,7 @@ properties([
 ])
 currentBuild.rawBuild.getParent().setQuietPeriod(0)
 
-library 'jenkins-pipeline-library@main'
+library 'jenkins-pipeline-library@alpinemuslfix'
 
 /*
   Go Version examples:
@@ -46,4 +46,4 @@ builder.goapi([
     }
     return permutations
   }
-]) 
+])
