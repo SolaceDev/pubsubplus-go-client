@@ -35,8 +35,8 @@ library 'jenkins-pipeline-library@alpinemuslfix'
 */
 
 builder.goapi([
-  "buildCheckGoVer": 'auto-v1.23.x',
-  "validationGoVer": 'auto-v1.23.x',
+  "buildCheckGoVer": 'auto-v1.17.x',
+  "validationGoVer": 'auto-v1.17.x',
   "getTestPermutations": {
     List<List<String>> permutations = []
     for (platform in [builder.LINUX_MUSL]) {
