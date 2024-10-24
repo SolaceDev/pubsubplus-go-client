@@ -591,11 +591,7 @@ var _ = Describe("PersistentReceiver", func() {
 					Eventually(msgChan).Should(Receive(Not(BeNil())))
 				})
 
-				Context("pause and resume tests", Label("flaky-tests"), func() {
-					BeforeEach(func() {
-						Skip("Currently failing in Jenkins pipeline on Linux Musl nodes - SOL-124616")
-					})
-
+				Context("pause and resume tests", func() {
 					It("can pause and resume messaging repeatedly", func() {
 						numMessages := 1000
 						msgChan := make(chan message.InboundMessage, numMessages)
