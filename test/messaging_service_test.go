@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"time"
+	"net"
 
 	"solace.dev/go/messaging"
 	"solace.dev/go/messaging/pkg/solace"
@@ -272,6 +273,16 @@ var _ = Describe("MessagingService Lifecycle", func() {
 		helpers.TestConnectDisconnectMessagingServiceClientValidation(builder, func(client *monitor.MsgVpnClient) {
 			Expect(client.ClientUsername).To(Equal(testcontext.Messaging().Authentication.BasicUsername))
 		})
+	})
+
+	It("Can connect with 2000 FDs already open (might fail on Windows, we want to see it pass on MacOS)", func() {
+		for i := 0; i < 2000; i++ {
+			socket, _ := net.Listen("tcp", "127.0.0.1:");
+			defer socket.Close()
+		}
+		messagingService := helpers.BuildMessagingService(builder)
+		helpers.ConnectMessagingService(messagingService)
+		helpers.DisconnectMessagingService(messagingService)
 	})
 
 	Context("when using compression", func() {
