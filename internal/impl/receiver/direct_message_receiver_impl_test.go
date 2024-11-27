@@ -30,6 +30,7 @@ import (
 	"solace.dev/go/messaging/pkg/solace/message"
 	"solace.dev/go/messaging/pkg/solace/resource"
 	"solace.dev/go/messaging/pkg/solace/subcode"
+	"solace.dev/go/messaging/pkg/solace/cache"
 )
 
 func TestBuilderWithInvalidBackpressureStrategy(t *testing.T) {
@@ -1234,4 +1235,16 @@ func TestDirectReceiverUnsolicitedTermination(t *testing.T) {
 	if !metricsIncremented {
 		t.Error("metrics not incremented on incomplete delivery")
 	}
+}
+
+func TestCacheImport(t *testing.T) {
+        var num1 int64 = 6
+        s1 := "string_one"
+        f := cache.NewFoo(num1, s1)
+        if f.GetNum() != num1 {
+                t.Errorf("Got int error")
+        }
+        if f.GetString() != s1 {
+                t.Errorf("Got string error")
+        }
 }
