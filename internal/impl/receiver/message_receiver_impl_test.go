@@ -295,6 +295,12 @@ type mockInternalReceiver struct {
 	newPersistentReceiver      func(props []string, callback core.RxCallback, eventCallback core.PersistentEventCallback) (core.PersistentReceiver, *ccsmp.SolClientErrorInfoWrapper)
 }
 
+// GetSessionPointer needs to be implemented only to satisfy the interface. Retrieving a session pointer would
+// require an actual session, which would go beyond the scope of testing intended for this module.
+func (mock *mockInternalReceiver) GetSessionPointer() ccsmp.SolClientSessionPt {
+	return ccsmp.SolClientOpaquePointerInvalidValue
+}
+
 func (mock *mockInternalReceiver) Events() core.Events {
 	if mock.events != nil {
 		return mock.events()
