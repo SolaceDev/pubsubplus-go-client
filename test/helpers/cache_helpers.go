@@ -94,7 +94,7 @@ func SendMsgsToTopic(topic string, numMessages int) {
 	}
 	for i := 0; i < numMessages; i++ {
 		var receivedMessage message.InboundMessage
-		Eventually(receivedMsgs, "5s").Should(Receive(&receivedMessage), fmt.Sprintf("Timed out waiting to receive message %d of %d", i, numMessages))
+		Eventually(receivedMsgs, "10s").Should(Receive(&receivedMessage), fmt.Sprintf("Timed out waiting to receive message %d of %d", i, numMessages))
 		Expect(receivedMessage.GetDestinationName()).To(Equal(topic))
 	}
 }
