@@ -49,13 +49,13 @@ OAuth tests can be run when using testcontainers by exporting the variable OAUTH
 
 ### Cache
 Cache tests can be run when using testcontainers by exporting the variables:
-- PUBSUB_CACHE_HOSTNAME=<name of cache instance>
-- PUBSUB_CACHE_SUPSECT_HOSTNAME=<name of suspect cache instance>
-- PUBSUB_CACHE_TEST_IMAGE=<name of docker image for cache instances>
-- PUBSUB_CACHEPROXY_TEST_IMAGE=<name of docker image for cahce proxy instances>
+- `PUBSUB_CACHE_HOSTNAME=<name of cache instance>`
+- `PUBSUB_CACHE_SUPSECT_HOSTNAME=<name of suspect cache instance>`
+- `SOLCACHE_TEST_IMAGE=<name of docker image for cache instances>`
+- `SOLCACHEPROXY_TEST_IMAGE=<name of docker image for cahce proxy instances>`
 These environment variables are used to create and destroy the various docker containers that are required for testing. Modifying these variables after they have been used to create containers will lead to undefined behaviour and should not be done. Populating these variables during test execution should not be expected to cause the containers to be created partway through the tests, and will lead to undefined behaviour.
-PUBSUB_CACHE_HOSTNAME, PUBSUB_CACHE_SUPSECT_HOSTNAME, and PUBSUB_CACHE_TEST_IMAGE are all necessary to run cache tests.
-PUBSUB_CACHE_HOSTNAME, and PUBSUB_CACHEPROXY_TEST_IMAGE are all necessary to run cache proxy tests. For tests that use both cache and cache proxy, all four variables are needed. Cache suspect is just a specfially configured cache instance, so tests that use suspect cache have the same requirements as those that use cache.
+PUBSUB_CACHE_HOSTNAME, PUBSUB_CACHE_SUPSECT_HOSTNAME, and SOLCACHE_TEST_IMAGE are all necessary to run cache tests.
+PUBSUB_CACHE_HOSTNAME, and SOLCACHEPROXY_TEST_IMAGE are all necessary to run cache proxy tests. For tests that use both cache and cache proxy, all four variables are needed. Cache suspect is just a specfially configured cache instance, so tests that use suspect cache have the same requirements as those that use cache.
 The docker images for cache and suspect cache instances are the same. The docker images for cache and cache proxy are distinct. The cache docker image is proprietary and can only be gotten through a purchased product key. The docker image for cache proxy is proprietary, for internal use only, and not available to the general public.
 
 ### Running the tests from inside a docker container

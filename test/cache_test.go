@@ -331,6 +331,7 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.ReceiveAsync(func(msg message.InboundMessage) {
 				cachedOnlyMsgChan <- msg
 			})
+			Expect(err).To(BeNil())
 
 			numConfiguredCachedMessages := 3
 			numConfiguredLiveMessages := 1
@@ -371,7 +372,8 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			cachedOnlyChannel, err := cachedOnlyReceiver.RequestCachedAsync(cachedOnlyCacheRequestConfig, cachedOnlyCacheRequestID)
 			var cacheResponse solace.CacheResponse
-			if cacheRequestStrategy != resource.CacheRequestStrategyLiveCancelsCached && cacheRequestStrategy != resource.CacheRequestStrategyCachedFirst {
+			if (cacheRequestStrategy == resource.CacheRequestStrategyLiveCancelsCached && withLiveMessages) ||
+				(cacheRequestStrategy != resource.CacheRequestStrategyLiveCancelsCached && cacheRequestStrategy != resource.CacheRequestStrategyCachedFirst) {
 				Expect(err).To(BeNil())
 				Expect(cachedOnlyChannel).ToNot(BeNil())
 				/* NOTE: We only wait for a cache response for as much as the delay because the point of the test is to
@@ -434,14 +436,16 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
-			   case resource.CacheRequestStrategyLiveCancelsCached:
-			           if withLiveMessages {
-			                   numExpectedLiveMessages := numConfiguredLiveMessages
-			               waitForLiveMessages(numExpectedLiveMessages)
-			           }
-			           waitForCachedMessages(numExpectedCachedMessages, receivedMsgChan, concurrentCacheRequestID)
-			*/
+			// re-enabled for EBP-638.
+			case resource.CacheRequestStrategyLiveCancelsCached:
+				if withLiveMessages {
+					numExpectedLiveMessages := numConfiguredLiveMessages
+					waitForLiveMessages(numExpectedLiveMessages)
+					// Cache message comes after the live one has arrived
+					waitForCachedMessages(numExpectedCachedMessages, receivedMsgChan, cachedOnlyCacheRequestID)
+				} else {
+					waitForCachedMessages(numExpectedCachedMessages, receivedMsgChan, concurrentCacheRequestID)
+				}
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -474,15 +478,11 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.Terminate(0)
 			Expect(err).To(BeNil())
 		},
-			/* NOTE: LiveCancelsCached is disabled for this test until EBP-638 is resolved. These variants of the test
-			 * are not critical to the use case coverage intended by this test, so it's fine for them to be disabled
-			 * for now. These variants are expected to fail immediately, but do not as per the description of EBP-638.
-			 * That use case is covered in other tests within the test suite, and is not the focus of this test. The
-			 * focus of this test is to assert the behaviour of received messages when there are identical/overlapping
+			/* The focus of this test is to assert the behaviour of received messages when there are identical/overlapping
 			 * subscriptions on the same receiver for concurrent requests.
 			 */
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
@@ -530,7 +530,8 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			cachedOnlyChannel, err := receiver.RequestCachedAsync(cachedOnlyCacheRequestConfig, cachedOnlyCacheRequestID)
 			var cacheResponse solace.CacheResponse
-			if cacheRequestStrategy != resource.CacheRequestStrategyLiveCancelsCached && cacheRequestStrategy != resource.CacheRequestStrategyCachedFirst {
+			if (cacheRequestStrategy == resource.CacheRequestStrategyLiveCancelsCached && withLiveMessages) ||
+				(cacheRequestStrategy != resource.CacheRequestStrategyLiveCancelsCached && cacheRequestStrategy != resource.CacheRequestStrategyCachedFirst) {
 				Expect(err).To(BeNil())
 				Expect(cachedOnlyChannel).ToNot(BeNil())
 				/* NOTE: We only wait for a cache response for as much as the delay because the point of the test is to
@@ -593,14 +594,16 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
-			   case resource.CacheRequestStrategyLiveCancelsCached:
-			           if withLiveMessages {
-			                   numExpectedLiveMessages := numConfiguredLiveMessages
-			               waitForLiveMessages(numExpectedLiveMessages)
-			           }
-			           waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
-			*/
+			// re-enabled for EBP-638.
+			case resource.CacheRequestStrategyLiveCancelsCached:
+				if withLiveMessages {
+					numExpectedLiveMessages := numConfiguredLiveMessages
+					waitForLiveMessages(numExpectedLiveMessages)
+					// Cache message comes after the live one has arrived
+					waitForCachedMessages(numExpectedCachedMessages*2, cachedOnlyCacheRequestID)
+				} else {
+					waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
+				}
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -630,15 +633,11 @@ var _ = Describe("Cache Strategy", func() {
 			/* NOTE: Assert the receiver did not receive further messages. */
 			Consistently(receivedMsgChan, "1ms").ShouldNot(Receive())
 		},
-			/* NOTE: LiveCancelsCached is disabled for this test until EBP-638 is resolved. These variants of the test
-			 * are not critical to the use case coverage intended by this test, so it's fine for them to be disabled
-			 * for now. These variants are expected to fail immediately, but do not as per the description of EBP-638.
-			 * That use case is covered in other tests within the test suite, and is not the focus of this test. The
-			 * focus of this test is to assert the behaviour of received messages when there are identical/overlapping
+			/* The focus of this test is to assert the behaviour of received messages when there are identical/overlapping
 			 * subscriptions on the same receiver for concurrent requests.
 			 */
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
@@ -657,6 +656,7 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.ReceiveAsync(func(msg message.InboundMessage) {
 				cachedOnlyMsgChan <- msg
 			})
+			Expect(err).To(BeNil())
 			numConfiguredCachedMessages := 3
 			numConfiguredLiveMessages := 1
 			delay := 2000
@@ -765,7 +765,7 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
+			// re-enabled for EBP-638.
 			case resource.CacheRequestStrategyLiveCancelsCached:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -775,7 +775,6 @@ var _ = Describe("Cache Strategy", func() {
 					waitForCachedMessages(numExpectedCachedMessages, cachedOnlyCacheRequestID)
 					waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
 				}
-			*/
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -802,9 +801,8 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.Terminate(0)
 			Expect(err).To(BeNil())
 		},
-			/* NOTE: Re-enable once EBP-638 is resolved. See previous test comment for details.*/
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
@@ -952,6 +950,7 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.ReceiveAsync(func(msg message.InboundMessage) {
 				cachedOnlyMsgChan <- msg
 			})
+			Expect(err).To(BeNil())
 
 			numConfiguredCachedMessages := 3
 			numConfiguredLiveMessages := 1
@@ -1037,14 +1036,9 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
-			   case resource.CacheRequestStrategyLiveCancelsCached:
-			           if withLiveMessages {
-			                   numExpectedLiveMessages := numConfiguredLiveMessages
-			               waitForLiveMessages(numExpectedLiveMessages)
-			           }
-			           waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
-			*/
+			// re-enabled for EBP-638
+			case resource.CacheRequestStrategyLiveCancelsCached:
+				Consistently(receivedMsgChan, "1ms").ShouldNot(Receive())
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -1077,15 +1071,11 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.Terminate(0)
 			Expect(err).To(BeNil())
 		},
-			/* NOTE: LiveCancelsCached is disabled for this test until EBP-638 is resolved. These variants of the test
-			 * are not critical to the use case coverage intended by this test, so it's fine for them to be disabled
-			 * for now. These variants are expected to fail immediately, but do not as per the description of EBP-638.
-			 * That use case is covered in other tests within the test suite, and is not the focus of this test. The
-			 * focus of this test is to assert the behaviour of received messages when there are identical/overlapping
+			/* The focus of this test is to assert the behaviour of received messages when there are identical/overlapping
 			 * subscriptions on the same receiver for concurrent requests.
 			 */
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
@@ -1178,14 +1168,12 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
-			   case resource.CacheRequestStrategyLiveCancelsCached:
-			           if withLiveMessages {
-			                   numExpectedLiveMessages := numConfiguredLiveMessages
-			               waitForLiveMessages(numExpectedLiveMessages)
-			           }
-			           waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
-			*/
+			// re-enabled for EBP-638.
+			case resource.CacheRequestStrategyLiveCancelsCached:
+				waitForCachedMessages(numExpectedCachedMessages, cachedOnlyCacheRequestID)
+				if withLiveMessages {
+					Consistently(receivedMsgChan, "1ms").ShouldNot(Receive())
+				}
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -1211,15 +1199,11 @@ var _ = Describe("Cache Strategy", func() {
 			/* NOTE: Assert the receiver did not receive further messages. */
 			Consistently(receivedMsgChan, "1ms").ShouldNot(Receive())
 		},
-			/* NOTE: LiveCancelsCached is disabled for this test until EBP-638 is resolved. These variants of the test
-			 * are not critical to the use case coverage intended by this test, so it's fine for them to be disabled
-			 * for now. These variants are expected to fail immediately, but do not as per the description of EBP-638.
-			 * That use case is covered in other tests within the test suite, and is not the focus of this test. The
-			 * focus of this test is to assert the behaviour of received messages when there are identical/overlapping
+			/* The focus of this test is to assert the behaviour of received messages when there are identical/overlapping
 			 * subscriptions on the same receiver for concurrent requests.
 			 */
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
@@ -1238,6 +1222,7 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.ReceiveAsync(func(msg message.InboundMessage) {
 				cachedOnlyMsgChan <- msg
 			})
+			Expect(err).To(BeNil())
 			numConfiguredCachedMessages := 3
 			numConfiguredLiveMessages := 1
 			delay := 2000
@@ -1328,7 +1313,7 @@ var _ = Describe("Cache Strategy", func() {
 			}
 			numExpectedCachedMessages := numConfiguredCachedMessages
 			switch cacheRequestStrategy {
-			/* re-enable once EBP-638 is resolved.
+			// re-enabled for EBP-638.
 			case resource.CacheRequestStrategyLiveCancelsCached:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -1338,7 +1323,6 @@ var _ = Describe("Cache Strategy", func() {
 					waitForCachedMessages(numExpectedCachedMessages, cachedOnlyCacheRequestID)
 					waitForCachedMessages(numExpectedCachedMessages, concurrentCacheRequestID)
 				}
-			*/
 			case resource.CacheRequestStrategyAsAvailable:
 				if withLiveMessages {
 					numExpectedLiveMessages := numConfiguredLiveMessages
@@ -1365,9 +1349,8 @@ var _ = Describe("Cache Strategy", func() {
 			err = cachedOnlyReceiver.Terminate(0)
 			Expect(err).To(BeNil())
 		},
-			/* NOTE: Re-enable once EBP-638 is resolved. See previous test comment for details.*/
-			//Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
-			//Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
+			Entry("with a LiveCancelsCached without live messages", resource.CacheRequestStrategyLiveCancelsCached, false),
+			Entry("with a LiveCancelsCached with live messages", resource.CacheRequestStrategyLiveCancelsCached, true),
 			Entry("with a AsAvailable without live messages", resource.CacheRequestStrategyAsAvailable, false),
 			Entry("with a AsAvailable with live messages", resource.CacheRequestStrategyAsAvailable, true),
 			Entry("with a CachedFirst without live messages", resource.CacheRequestStrategyCachedFirst, false),
