@@ -42,9 +42,10 @@ const (
 
 func DefaultCacheConfiguration() config.ServicePropertyMap {
 	connectionDetails := testcontext.Messaging()
+	cacheDetails := testcontext.Cache()
 	url := fmt.Sprintf("%s:%d", connectionDetails.Host, connectionDetails.MessagingPorts.PlaintextPort)
 	config := config.ServicePropertyMap{
-		config.ServicePropertyVPNName:                     testcontext.Cache().Vpn,
+		config.ServicePropertyVPNName:                     cacheDetails.Vpn,
 		config.TransportLayerPropertyHost:                 url,
 		config.AuthenticationPropertySchemeBasicUserName:  connectionDetails.Authentication.BasicUsername,
 		config.AuthenticationPropertySchemeBasicPassword:  connectionDetails.Authentication.BasicPassword,
@@ -85,8 +86,9 @@ func SendMsgsToTopic(topic string, numMessages int) {
 	err = receiver.ReceiveAsync(cacheMessageHandlerCallback)
 	Expect(err).To(BeNil())
 	counter := 0
+	messageBuilder := messagingService.MessageBuilder()
 	for counter < numMessages {
-		msg, err := messagingService.MessageBuilder().BuildWithStringPayload(fmt.Sprintf("message %d", counter))
+		msg, err := messageBuilder.BuildWithStringPayload(fmt.Sprintf("message %d", counter))
 		Expect(err).To(BeNil())
 		err = publisher.Publish(msg, resource.TopicOf(topic))
 		Expect(err).To(BeNil())
@@ -100,11 +102,11 @@ func SendMsgsToTopic(topic string, numMessages int) {
 }
 
 // InitCacheWithPreExistingMessages assumes that `clusterName` is the name of a valid cache cluster.
-func InitCacheWithPreExistingMessages(cacheCluster testcontext.CacheClusterConfig) {
+func InitCacheWithPreExistingMessages(cacheCluster testcontext.CacheClusterConfig, cacheVpnName string) {
 	topics := []string{}
 	const defaultNumMessages int = 1
 	const standardClusterNamePrefix string = "MaxMsgs"
-	vpnName := testcontext.Cache().Vpn
+	vpnName := cacheVpnName
 	numMessages := defaultNumMessages
 	clusterName := cacheCluster.Name
 	for _, topic := range cacheCluster.Topics {
@@ -134,9 +136,10 @@ func InitCacheWithPreExistingMessages(cacheCluster testcontext.CacheClusterConfi
 }
 
 func InitAllCacheClustersWithMessages() {
-	for _, distributedCache := range testcontext.Cache().DistributedCaches {
+	cacheDetails := testcontext.Cache()
+	for _, distributedCache := range cacheDetails.DistributedCaches {
 		for _, cacheCluster := range distributedCache.CacheClusters {
-			InitCacheWithPreExistingMessages(cacheCluster)
+			InitCacheWithPreExistingMessages(cacheCluster, cacheDetails.Vpn)
 		}
 	}
 }
@@ -177,7 +180,8 @@ func CacheToxicConfiguration() config.ServicePropertyMap {
 	if toxiConfig := ToxicConfiguration(); toxiConfig == nil {
 		return nil
 	} else {
-		toxiConfig[config.ServicePropertyVPNName] = testcontext.Cache().Vpn
+		cacheDetails := testcontext.Cache()
+		toxiConfig[config.ServicePropertyVPNName] = cacheDetails.Vpn
 		return toxiConfig
 	}
 }
