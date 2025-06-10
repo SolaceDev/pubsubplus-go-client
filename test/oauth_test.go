@@ -18,7 +18,7 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"solace.dev/go/messaging"
@@ -36,7 +36,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("OAuth Strategy", func() {
+var _ = Describe("OAuth Strategy", Label("OAuth"), func() {
 	const rootAuthorityName = "oauth_trusted_root"
 
 	const tokenA = "eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3NvbGFjZS5pZC50b2tlbi50ZXN0LmNvbSIsInN1YiI6InNvbGNsaWVudF9vYXV0aCIsImF1ZCI6InNvbGNsaWVudF9vYXV0aCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyMTQ3NDgzNjQ3LCJncm91cHMiOiJzb2xjbGllbnRfb2F1dGhfYXV0aF9ncm91cCJ9.UXTA4LGaq3flAmBMKq_vne07x1HyQMoDKWJgPHQYOVWkrRKTXArswDi_l8hOoQp-Smqqq0kJamVXjS4WlCK0ir3_ONhY8ZsERjYK5574-ojhxnpPAqTbx3nau0cYe0Ni19oFPPPFTjvBqgYRZKS7a-BB9o4UiOYVWzfqFWAfeFKHj4rmkv8GWgbP7yegylbUGGT38y9jNWG1BWL7JU36P2mzqOc46i7idKU0-QYd_gBrTsADh_O-mJlWLoLo-TtS8MIxduwsjeWIGFtadZJZjB2fDyCWDHwLTj-yQmak7HT3GvZdW7NPN1eHRKqZCax_j4ATRNGWMy08q4KSVeBwdpLeYZw1qyp6uZB_0-dYTNr8dA3Vcljzi7JQPFirvQdCSjUigad_LgPAIoHKaJIFWjxEf9cYWCQFO9dgg2YZvATMW301m4saMmDJpqhDIPoJgW3RBYa55ExCENQx82IiBgHl6fjbKWMGKS7s6pUdHsc_2QO_Wetp3uKkv2YegN6E3wFU-UZsITfVAvuAXSqE9QBqlX0b3gTq3RsUywh5jDosNY5g8zHCRzY2lpcFq9PRuZjAzBWvhufIMOyZK-uXF7aPY09boBzWj496q07hBwx6WF38XIGZkeWe1wZg_LrVUC_2gb_cULhrblUSdfMuMsuNhxS0XGCFd23Zr_cjaZI"
@@ -51,7 +51,10 @@ var _ = Describe("OAuth Strategy", func() {
 
 	Describe("When OAuth Authentication is allowed on the Message VPN", func() {
 
-		BeforeEach(func() {
+		/* Time Delay Between SEMP requests */
+		var waitBeforeNextSEMPRequest = time.Second * 3
+
+		BeforeAll(func() {
 			if testcontext.OAuth().Hostname == "" || testcontext.OAuth().Endpoints == nil {
 				Skip("No OAuth server endpoints found")
 			}
@@ -70,7 +73,7 @@ var _ = Describe("OAuth Strategy", func() {
 			}
 
 			var err error
-			certContent, err := ioutil.ReadFile(constants.ValidClientCertificatePEM)
+			certContent, err := os.ReadFile(constants.ValidClientCertificatePEM)
 			Expect(err).ToNot(HaveOccurred())
 			err = helpers.EnsureCreateDomainCertAuthority(rootAuthorityName, string(certContent))
 			Expect(err).ToNot(HaveOccurred())
@@ -83,6 +86,13 @@ var _ = Describe("OAuth Strategy", func() {
 				nil,
 			)
 			Expect(err).ToNot(HaveOccurred())
+			// wait for base semp service to reload
+			err = testcontext.WaitForSEMPReachable()
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
 
 			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.CreateMsgVpnAuthenticationOauthProfile(
 				testcontext.SEMP().ConfigCtx(),
@@ -100,6 +110,10 @@ var _ = Describe("OAuth Strategy", func() {
 				nil,
 			)
 			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
 
 			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.CreateMsgVpnAuthenticationOauthProfile(
 				testcontext.SEMP().ConfigCtx(),
@@ -125,6 +139,10 @@ var _ = Describe("OAuth Strategy", func() {
 			)
 			Expect(err).ToNot(HaveOccurred())
 
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			_, _, err = testcontext.SEMP().Config().AuthorizationGroupApi.CreateMsgVpnAuthorizationGroup(
 				testcontext.SEMP().ConfigCtx(),
 				sempconfig.MsgVpnAuthorizationGroup{
@@ -136,6 +154,10 @@ var _ = Describe("OAuth Strategy", func() {
 			)
 			Expect(err).ToNot(HaveOccurred())
 
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			_, _, err = testcontext.SEMP().Config().ClientUsernameApi.CreateMsgVpnClientUsername(
 				testcontext.SEMP().ConfigCtx(),
 				sempconfig.MsgVpnClientUsername{
@@ -146,6 +168,10 @@ var _ = Describe("OAuth Strategy", func() {
 				nil,
 			)
 			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
 
 			url = fmt.Sprintf("tcps://%s:%d", testcontext.Messaging().Host, testcontext.Messaging().MessagingPorts.SecurePort)
 			builder = messaging.NewMessagingServiceBuilder().FromConfigurationProvider(config.ServicePropertyMap{
@@ -159,7 +185,7 @@ var _ = Describe("OAuth Strategy", func() {
 			})
 		})
 
-		AfterEach(func() {
+		AfterAll(func() {
 			var err error
 
 			_, _, err = testcontext.SEMP().Config().MsgVpnApi.UpdateMsgVpn(
@@ -172,12 +198,20 @@ var _ = Describe("OAuth Strategy", func() {
 			)
 			Expect(err).ToNot(HaveOccurred())
 
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
 				testcontext.SEMP().ConfigCtx(),
 				testcontext.Messaging().VPN,
 				"SolaceOauthClient",
 			)
 			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
 
 			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
 				testcontext.SEMP().ConfigCtx(),
@@ -186,6 +220,10 @@ var _ = Describe("OAuth Strategy", func() {
 			)
 			Expect(err).ToNot(HaveOccurred())
 
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			_, _, err = testcontext.SEMP().Config().AuthorizationGroupApi.DeleteMsgVpnAuthorizationGroup(
 				testcontext.SEMP().ConfigCtx(),
 				testcontext.Messaging().VPN,
@@ -193,14 +231,28 @@ var _ = Describe("OAuth Strategy", func() {
 			)
 			Expect(err).ToNot(HaveOccurred())
 
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			_, _, err = testcontext.SEMP().Config().ClientUsernameApi.DeleteMsgVpnClientUsername(
 				testcontext.SEMP().ConfigCtx(),
 				testcontext.Messaging().VPN,
 				"solclient_oauth",
 			)
 			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			err = helpers.EnsureDeleteDomainCertAuthority(rootAuthorityName)
 			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
 			if messagingService.IsConnected() {
 				helpers.DisconnectMessagingService(messagingService)
 			}
@@ -223,7 +275,8 @@ var _ = Describe("OAuth Strategy", func() {
 			},
 			Entry("When given id token a, no access token and no issuer identifier", "", tokenA, ""),
 			Entry("When given id token b, access token c and no issuer identifier", tokenC, tokenB, ""),
-			Entry("When given id token b, access token c and no issuer identifier", tokenD, tokenB, ""),
+			Entry("When given id token b, access token d and no issuer identifier", tokenD, tokenB, ""),
+
 			Entry("When given access token c, no id token and no issuer identifier", tokenC, "", ""),
 			Entry("When given access token d, no id token and an issuer identifier", tokenD, "", issuerIdentifier),
 		)
