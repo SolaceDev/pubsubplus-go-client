@@ -19,7 +19,6 @@ package testcontext
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
@@ -161,7 +160,7 @@ func toEnvironment(val interface{}) map[string]string {
 
 func (config *TestConfig) loadConfig(configFile string) error {
 	// TODO allow additional config files to be layered through environment variables
-	configJSON, err := ioutil.ReadFile(configFile)
+	configJSON, err := os.ReadFile(configFile)
 	if err != nil {
 		return err
 	}

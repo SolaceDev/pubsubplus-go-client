@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -159,7 +158,7 @@ func FromEnum(inputFile, outputFile, enumName, enumPrefix, variablePrefix, typeN
 }
 
 func readFile(inputFile string) []byte {
-	data, err := ioutil.ReadFile(inputFile)
+	data, err := os.ReadFile(inputFile)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
