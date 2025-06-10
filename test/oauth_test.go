@@ -49,7 +49,7 @@ var _ = Describe("OAuth Strategy", Label("OAuth"), func() {
 	var messagingService solace.MessagingService
 	var url string
 
-	Describe("When OAuth Authentication is allowed on the Message VPN", func() {
+	Describe("When OAuth Authentication is allowed on the Message VPN", Ordered, func() {
 
 		/* Time Delay Between SEMP requests */
 		var waitBeforeNextSEMPRequest = time.Second * 3
@@ -183,80 +183,6 @@ var _ = Describe("OAuth Strategy", Label("OAuth"), func() {
 				config.TransportLayerPropertyHost:                           url,
 				config.TransportLayerPropertyReconnectionAttempts:           0,
 			})
-		})
-
-		AfterAll(func() {
-			var err error
-
-			_, _, err = testcontext.SEMP().Config().MsgVpnApi.UpdateMsgVpn(
-				testcontext.SEMP().ConfigCtx(),
-				sempconfig.MsgVpn{
-					AuthenticationOauthEnabled: helpers.False,
-				},
-				testcontext.Messaging().VPN,
-				nil,
-			)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
-				testcontext.SEMP().ConfigCtx(),
-				testcontext.Messaging().VPN,
-				"SolaceOauthClient",
-			)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
-				testcontext.SEMP().ConfigCtx(),
-				testcontext.Messaging().VPN,
-				"SolaceOauthResourceServer",
-			)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			_, _, err = testcontext.SEMP().Config().AuthorizationGroupApi.DeleteMsgVpnAuthorizationGroup(
-				testcontext.SEMP().ConfigCtx(),
-				testcontext.Messaging().VPN,
-				"solclient_oauth_auth_group",
-			)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			_, _, err = testcontext.SEMP().Config().ClientUsernameApi.DeleteMsgVpnClientUsername(
-				testcontext.SEMP().ConfigCtx(),
-				testcontext.Messaging().VPN,
-				"solclient_oauth",
-			)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			err = helpers.EnsureDeleteDomainCertAuthority(rootAuthorityName)
-			Expect(err).ToNot(HaveOccurred())
-
-			/* NOTE: We delay before sending the next SEMP request
-			 */
-			time.Sleep(waitBeforeNextSEMPRequest)
-
-			if messagingService.IsConnected() {
-				helpers.DisconnectMessagingService(messagingService)
-			}
-
 		})
 
 		DescribeTable("Messaging Service connects successfully",
@@ -608,6 +534,80 @@ var _ = Describe("OAuth Strategy", Label("OAuth"), func() {
 					})
 				})
 			})
+		})
+
+		AfterAll(func() {
+			var err error
+
+			_, _, err = testcontext.SEMP().Config().MsgVpnApi.UpdateMsgVpn(
+				testcontext.SEMP().ConfigCtx(),
+				sempconfig.MsgVpn{
+					AuthenticationOauthEnabled: helpers.False,
+				},
+				testcontext.Messaging().VPN,
+				nil,
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
+				testcontext.SEMP().ConfigCtx(),
+				testcontext.Messaging().VPN,
+				"SolaceOauthClient",
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			_, _, err = testcontext.SEMP().Config().AuthenticationOauthProfileApi.DeleteMsgVpnAuthenticationOauthProfile(
+				testcontext.SEMP().ConfigCtx(),
+				testcontext.Messaging().VPN,
+				"SolaceOauthResourceServer",
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			_, _, err = testcontext.SEMP().Config().AuthorizationGroupApi.DeleteMsgVpnAuthorizationGroup(
+				testcontext.SEMP().ConfigCtx(),
+				testcontext.Messaging().VPN,
+				"solclient_oauth_auth_group",
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			_, _, err = testcontext.SEMP().Config().ClientUsernameApi.DeleteMsgVpnClientUsername(
+				testcontext.SEMP().ConfigCtx(),
+				testcontext.Messaging().VPN,
+				"solclient_oauth",
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			err = helpers.EnsureDeleteDomainCertAuthority(rootAuthorityName)
+			Expect(err).ToNot(HaveOccurred())
+
+			/* NOTE: We delay before sending the next SEMP request
+			 */
+			time.Sleep(waitBeforeNextSEMPRequest)
+
+			if messagingService.IsConnected() {
+				helpers.DisconnectMessagingService(messagingService)
+			}
+
 		})
 	})
 
