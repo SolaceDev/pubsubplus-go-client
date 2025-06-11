@@ -158,8 +158,8 @@ func EnsureCreateDomainCertAuthority(certAuthName string, certContent string) er
 			return err
 		}
 		// ensure domain certification authority exists on the broker
-		// wait up to 30 secs after the service is back is overkill however to have an exit condition to prevent hung tests
-		for i := 0; i < 30; i++ {
+		// wait up to 45 secs after the service is back is overkill however to have an exit condition to prevent hung tests
+		for i := 0; i < 45; i++ {
 			found, err = HasDomainCertAuthority(certAuthName)
 
 			if err != nil {
@@ -197,8 +197,8 @@ func EnsureDeleteDomainCertAuthority(certAuthName string) error {
 			return err
 		}
 		// ensure domain certification authority does not exist on the broker
-		// wait up to 30 secs after the service is back is overkill however to have an exit condition to prevent hung tests
-		for i := 0; i < 30; i++ {
+		// wait up to 45 secs after the service is back is overkill however to have an exit condition to prevent hung tests
+		for i := 0; i < 45; i++ {
 			found, err = HasDomainCertAuthority(certAuthName)
 			if err != nil {
 				// the broker can sometimes fail to have semp up after cert auth change
