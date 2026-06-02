@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The Solace Messaging API for Go (`solace.dev/go/messaging`) is a high-performance Go client library for connecting to Solace Event Brokers. It wraps the native Solace C messaging library (CCSMP/libsolclient) via Cgo, providing pub/sub, request/reply, persistent messaging, and cache APIs.
 
-Current version: **1.10.1** (defined in `version.go`)
+Current version is defined in `version.go`
 
 ## Build Commands
 
