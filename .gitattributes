@@ -1,0 +1,35 @@
+# Enforce LF line endings for this project, independent of each developer's
+# global core.autocrlf setting. Text files are stored as LF in git AND checked
+# out as LF in the working tree, so gofmt and other tools never see CRLF churn.
+* text=auto eol=lf
+
+# Go toolchain text files (explicit for clarity; covered by the rule above).
+*.go   text eol=lf
+*.c    text eol=lf
+*.h    text eol=lf
+*.mod  text eol=lf
+*.sum  text eol=lf
+*.sh   text eol=lf
+
+# Native libraries, import libs, and debug symbols: never normalize or diff.
+*.a      binary
+*.lib    binary
+*.dll    binary
+*.dylib  binary
+*.so     binary
+*.pdb    binary
+
+# TLS test fixtures / keystores: preserve exact bytes (no normalization, no diff).
+*.pem  binary
+*.crt  binary
+*.key  binary
+*.ks   binary
+
+# Other binary assets (future-proofing).
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ico  binary
+*.zip  binary
+*.gz   binary
+*.tar  binary
