@@ -661,7 +661,7 @@ func SolClientMessageDump(messageP SolClientMessagePt) string {
 
 	// Truncate the message after 10,000 characters, SOL-62945
 	// removed the dynamic calculation of buffer size as defaultMsgDumpBufferSize{1000} + (payloadSize * msgDumpMultiplier{5})
-	bufferSize := C.ulong(maxDumpSize)
+	bufferSize := C.size_t(maxDumpSize)
 	buffer := (*C.char)(C.malloc(bufferSize))
 	defer C.free(unsafe.Pointer(buffer))
 

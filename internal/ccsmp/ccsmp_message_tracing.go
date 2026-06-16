@@ -69,7 +69,7 @@ const SpanIDSize = 8
 // SolClientMessageGetTraceContextTraceID function
 func SolClientMessageGetTraceContextTraceID(messageP SolClientMessagePt, contextType SolClientMessageTracingContextType) ([TraceIDSize]byte, *SolClientErrorInfoWrapper) {
 	// buffer to hold the traceID property
-	bufferSize := C.ulong(TraceIDSize)
+	bufferSize := C.size_t(TraceIDSize)
 	traceIDBuffer := (*C.solClient_uint8_t)(C.malloc(bufferSize))
 	defer C.free(unsafe.Pointer(traceIDBuffer))
 
@@ -110,7 +110,7 @@ func SolClientMessageSetTraceContextTraceID(messageP SolClientMessagePt, traceID
 // SolClientMessageGetTraceContextSpanID function
 func SolClientMessageGetTraceContextSpanID(messageP SolClientMessagePt, contextType SolClientMessageTracingContextType) ([SpanIDSize]byte, *SolClientErrorInfoWrapper) {
 	// buffer to hold the spanID property
-	bufferSize := C.ulong(SpanIDSize)
+	bufferSize := C.size_t(SpanIDSize)
 	spanIDBuffer := (*C.solClient_uint8_t)(C.malloc(bufferSize))
 	defer C.free(unsafe.Pointer(spanIDBuffer))
 
@@ -217,7 +217,7 @@ func SolClientMessageSetTraceContextTraceState(messageP SolClientMessagePt, trac
 	errorInfo := handleCcsmpError(func() SolClientReturnCode {
 		// trace state is not null terminal in SMF protocol
 		// write only char bytes not including null terminal, so use the length of the traceState string not len(traceState) + 1
-		return C.solClient_msg_tracing_setTraceStatePtr(messageP, contextType, cStr, C.ulong(traceStateLen))
+		return C.solClient_msg_tracing_setTraceStatePtr(messageP, contextType, cStr, C.size_t(traceStateLen))
 	})
 	return errorInfo
 }

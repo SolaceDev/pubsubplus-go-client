@@ -17,15 +17,6 @@
 //go:build dummy
 // +build dummy
 
-// dummy.go includes the relevant ccsmp library directories to support go vendoring.
-// It is excluded from all builds and exists as a workaround for https://github.com/golang/go/issues/26366.
-
-package ccsmp
-
-import (
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/darwin"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/include/solclient"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/linux_amd64"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/linux_arm64"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/windows_amd64"
-)
+// Package windows_amd64 is provided as a workaround for go vendoring and contains no go code.
+// See internal/ccsmp/dummy.go for more information.
+package windows_amd64

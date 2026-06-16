@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,18 +14,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build dummy
-// +build dummy
-
-// dummy.go includes the relevant ccsmp library directories to support go vendoring.
-// It is excluded from all builds and exists as a workaround for https://github.com/golang/go/issues/26366.
+//go:build windows && amd64
+// +build windows,amd64
 
 package ccsmp
 
-import (
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/darwin"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/include/solclient"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/linux_amd64"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/linux_arm64"
-	_ "solace.dev/go/messaging/internal/ccsmp/lib/windows_amd64"
-)
+// Compiler flags for windows/amd64, applied whether or not the experimental
+// support tag is set so that headers always resolve and the unsupported-build
+// guard can emit a clear #error instead of a misleading "header not found".
+//
+// winsock2.h must be force-included before solClient.h: on WIN32 the header
+// requires winsock(2).h to have been included first (it checks _WINSOCKAPI_).
+
+/*
+#cgo CFLAGS: -I${SRCDIR}/lib/include -DSOLCLIENT_PSPLUS_GO -include winsock2.h
+*/
+import "C"
