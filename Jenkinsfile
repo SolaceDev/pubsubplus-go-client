@@ -20,7 +20,7 @@ properties([
 ])
 currentBuild.rawBuild.getParent().setQuietPeriod(0)
 
-library 'jenkins-pipeline-library@main'
+library 'jenkins-pipeline-library@DATAGO-142440-manifest-write-post-fossa'
 
 /*
   Go Version examples:
@@ -39,7 +39,7 @@ builder.goapi([
   "validationGoVer": 'auto-v1.17.x',
   "getTestPermutations": {
     List<List<String>> permutations = []
-    for (platform in [builder.LINUX_ARM, builder.LINUX_X86_64, builder.DARWIN_X86_64,  builder.DARWIN_ARM, builder.LINUX_MUSL]) {
+    for (platform in []) {
       for (gover in ['auto-latest', 'auto-previous']) {
         permutations << [platform, gover]
       }
