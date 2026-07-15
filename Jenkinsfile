@@ -46,5 +46,5 @@ builder.goapi([
     }
     return permutations
   },
-  "manifestTrackingBranch": "dev",
+  "manifestTrackingBranch": "dev"
 ]) 
